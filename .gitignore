@@ -1,0 +1,8 @@
+backups/
+.test-data/
+/target/
+/dist/
+/.codex/
+/NVIDIA Corporation/
+/Reset-Claude.ps1
+/Reset-Claude.bat

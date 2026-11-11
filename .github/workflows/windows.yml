@@ -1,0 +1,41 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Rust tools
+        shell: pwsh
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+          rustup default stable
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Lint
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --locked
+      - name: Build portable application
+        run: cargo build --release --locked
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Copy-Item -LiteralPath target/release/sephiria-workshop-prep.exe -Destination dist/AveSepHelper.exe
+          Copy-Item -LiteralPath README.md -Destination dist/README.md
+      - uses: actions/upload-artifact@v7
+        with:
+          name: AveSepHelper-Windows
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
